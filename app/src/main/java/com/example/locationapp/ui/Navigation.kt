@@ -1,5 +1,8 @@
 package com.example.locationapp.ui
 
+import android.Manifest
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
@@ -15,6 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -37,6 +41,26 @@ fun Navigation() {
 
     // Initialize view model here and pass into screens
     val viewModel: MainViewModel = viewModel()
+
+    // Begin: Ask permission to get device location.
+    // Note: If permission is previously granted, the dialog won't appear and refreshLocation() will get called.
+    val launcher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { results ->
+        if (results.values.any { it }) {
+            viewModel.refreshLocation() // call a function to get the current location for device
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        launcher.launch(
+            arrayOf(
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            )
+        )
+    }
+    // End: Ask permission to get device location.
 
     // Main display (top bar, screens, bottom nav bar)
     Scaffold(
